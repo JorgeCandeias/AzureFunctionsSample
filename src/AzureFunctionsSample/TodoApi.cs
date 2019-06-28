@@ -15,7 +15,7 @@ namespace AzureFunctionsSample
         private static List<Todo> items = new List<Todo>();
 
         [FunctionName("CreateTodo")]
-        public static async Task<IActionResult> CreateTodo(
+        public static async Task<IActionResult> CreateTodoAsync(
             [HttpTrigger(AuthorizationLevel.Anonymous, "POST", Route = "todo")] HttpRequest request,
             ILogger logger)
         {
@@ -31,6 +31,16 @@ namespace AzureFunctionsSample
             items.Add(todo);
 
             return new OkObjectResult(todo);
+        }
+
+        [FunctionName("GetTodos")]
+        public static Task<IActionResult> GetTodosAsync(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "GET", Route = "todo")] HttpRequest _,
+            ILogger logger)
+        {
+            logger.LogInformation("Getting todo list items...");
+
+            return Task.FromResult(new OkObjectResult(items) as IActionResult);
         }
     }
 }
