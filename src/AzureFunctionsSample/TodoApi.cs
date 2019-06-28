@@ -46,16 +46,34 @@ namespace AzureFunctionsSample
         }
 
         [FunctionName("GetTodoById")]
-        public static ActionResult<Todo> GetTodoById(
+        public static ActionResult<Todo> GetTodoByIdAsync(
             [HttpTrigger(AuthorizationLevel.Anonymous, "GET", Route = "todo/{id}")] HttpRequest request,
             ILogger logger,
             Guid id)
         {
-            logger.LogInformation("Getting todo by id {@id}", id);
+            logger.LogInformation("Getting todo by id {@id}...", id);
 
             if (items.TryGetValue(id, out var value))
             {
                 return value;
+            }
+            else
+            {
+                return new NotFoundResult();
+            }
+        }
+
+        [FunctionName("UpdateTodo")]
+        public static async Task<ActionResult> UpdateTodoAsync(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "PUT", Route = "todo/{id}")] HttpRequest request,
+            ILogger logger,
+            Guid id)
+        {
+            logger.LogInformation("Updating todo by id {@id}...", id);
+
+            if (items.TryGetValue(id, out var value))
+            {
+                var body = await request.ReadAsStringAsync();
             }
             else
             {
