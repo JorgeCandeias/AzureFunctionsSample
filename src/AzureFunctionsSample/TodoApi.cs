@@ -5,17 +5,19 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace AzureFunctionsSample
 {
     public static class TodoApi
     {
-        private static List<Todo> items = new List<Todo>();
+        private static readonly Dictionary<Guid, Todo> items = new Dictionary<Guid, Todo>();
 
         [FunctionName("CreateTodo")]
-        public static async Task<IActionResult> CreateTodoAsync(
+        public static async Task<ActionResult<Todo>> CreateTodoAsync(
             [HttpTrigger(AuthorizationLevel.Anonymous, "POST", Route = "todo")] HttpRequest request,
             ILogger logger)
         {
@@ -28,19 +30,37 @@ namespace AzureFunctionsSample
             {
                 Description = input.Description
             };
-            items.Add(todo);
+            items[todo.Id] = todo;
 
-            return new OkObjectResult(todo);
+            return todo;
         }
 
         [FunctionName("GetTodos")]
-        public static Task<IActionResult> GetTodosAsync(
+        public static ActionResult<IEnumerable<Todo>> GetTodosAsync(
             [HttpTrigger(AuthorizationLevel.Anonymous, "GET", Route = "todo")] HttpRequest _,
             ILogger logger)
         {
             logger.LogInformation("Getting todo list items...");
 
-            return Task.FromResult(new OkObjectResult(items) as IActionResult);
+            return items.Values.ToList();
+        }
+
+        [FunctionName("GetTodoById")]
+        public static ActionResult<Todo> GetTodoById(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "GET", Route = "todo/{id}")] HttpRequest request,
+            ILogger logger,
+            Guid id)
+        {
+            logger.LogInformation("Getting todo by id {@id}", id);
+
+            if (items.TryGetValue(id, out var value))
+            {
+                return value;
+            }
+            else
+            {
+                return new NotFoundResult();
+            }
         }
     }
 }
