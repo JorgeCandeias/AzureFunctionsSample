@@ -85,5 +85,18 @@ namespace AzureFunctionsSample
 
             return todo;
         }
+
+        [FunctionName("DeleteTodo")]
+        public static ActionResult DeleteTodo(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "DELETE", Route = "todo/{id}")] HttpRequest request,
+            ILogger logger,
+            Guid id
+        )
+        {
+            if (!items.Remove(id))
+                return new NotFoundResult();
+
+            return new OkResult();
+        }
     }
 }
