@@ -64,21 +64,26 @@ namespace AzureFunctionsSample
         }
 
         [FunctionName("UpdateTodo")]
-        public static async Task<ActionResult> UpdateTodoAsync(
+        public static async Task<ActionResult<Todo>> UpdateTodoAsync(
             [HttpTrigger(AuthorizationLevel.Anonymous, "PUT", Route = "todo/{id}")] HttpRequest request,
             ILogger logger,
             Guid id)
         {
             logger.LogInformation("Updating todo by id {@id}...", id);
 
-            if (items.TryGetValue(id, out var value))
-            {
-                var body = await request.ReadAsStringAsync();
-            }
-            else
-            {
+            if (!items.TryGetValue(id, out var todo))
                 return new NotFoundResult();
+
+            var body = await request.ReadAsStringAsync();
+            var updated = JsonConvert.DeserializeObject<TodoUpdateModel>(body);
+
+            todo.IsCompleted = updated.IsCompleted;
+            if (!string.IsNullOrWhiteSpace(updated.Description))
+            {
+                todo.Description = updated.Description;
             }
+
+            return todo;
         }
     }
 }
