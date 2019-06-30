@@ -17,7 +17,7 @@ namespace AzureFunctionsSample
         private static readonly Dictionary<Guid, Todo> items = new Dictionary<Guid, Todo>();
 
         [FunctionName("CreateTodo")]
-        public static async Task<ActionResult<Todo>> CreateTodoAsync(
+        public static async Task<IActionResult> CreateTodoAsync(
             [HttpTrigger(AuthorizationLevel.Anonymous, "POST", Route = "todo")] HttpRequest request,
             ILogger logger)
         {
@@ -32,21 +32,21 @@ namespace AzureFunctionsSample
             };
             items[todo.Id] = todo;
 
-            return todo;
+            return new OkObjectResult(todo);
         }
 
         [FunctionName("GetTodos")]
-        public static ActionResult<IEnumerable<Todo>> GetTodosAsync(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "GET", Route = "todo")] HttpRequest _,
+        public static IActionResult GetTodosAsync(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "GET", Route = "todo")] HttpRequest request,
             ILogger logger)
         {
             logger.LogInformation("Getting todo list items...");
 
-            return items.Values.ToList();
+            return new OkObjectResult(items.Values.ToList());
         }
 
         [FunctionName("GetTodoById")]
-        public static ActionResult<Todo> GetTodoByIdAsync(
+        public static IActionResult GetTodoByIdAsync(
             [HttpTrigger(AuthorizationLevel.Anonymous, "GET", Route = "todo/{id}")] HttpRequest request,
             ILogger logger,
             Guid id)
@@ -55,7 +55,7 @@ namespace AzureFunctionsSample
 
             if (items.TryGetValue(id, out var value))
             {
-                return value;
+                return new OkObjectResult(value);
             }
             else
             {
@@ -64,7 +64,7 @@ namespace AzureFunctionsSample
         }
 
         [FunctionName("UpdateTodo")]
-        public static async Task<ActionResult<Todo>> UpdateTodoAsync(
+        public static async Task<IActionResult> UpdateTodoAsync(
             [HttpTrigger(AuthorizationLevel.Anonymous, "PUT", Route = "todo/{id}")] HttpRequest request,
             ILogger logger,
             Guid id)
@@ -83,11 +83,11 @@ namespace AzureFunctionsSample
                 todo.Description = updated.Description;
             }
 
-            return todo;
+            return new OkObjectResult(todo);
         }
 
         [FunctionName("DeleteTodo")]
-        public static ActionResult DeleteTodo(
+        public static IActionResult DeleteTodo(
             [HttpTrigger(AuthorizationLevel.Anonymous, "DELETE", Route = "todo/{id}")] HttpRequest request,
             ILogger logger,
             Guid id
