@@ -8,7 +8,6 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -20,6 +19,7 @@ namespace AzureFunctionsSample
         public static async Task<IActionResult> CreateTodoAsync(
             [HttpTrigger(AuthorizationLevel.Anonymous, "POST", Route = "todo")] HttpRequest request,
             [Table("todos", Connection = "AzureWebJobsStorage")] IAsyncCollector<TodoTableEntity> table,
+            [Queue("todos", Connection = "AzureWebJobsStorage")] IAsyncCollector<Todo> queue,
             ILogger logger)
         {
             logger.LogInformation("Creating a new todo list item...");
@@ -33,6 +33,7 @@ namespace AzureFunctionsSample
             };
 
             await table.AddAsync(todo.ToTableEntity());
+            await queue.AddAsync(todo);
 
             return new OkObjectResult(todo);
         }
