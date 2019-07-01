@@ -17,7 +17,7 @@ namespace AzureFunctionsSample
     {
         [FunctionName("CreateTodo")]
         public static async Task<IActionResult> CreateTodoAsync(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "POST", Route = "todo")] HttpRequest request,
+            [HttpTrigger(AuthorizationLevel.Function, "POST", Route = "todo")] HttpRequest request,
             [Table("todos", Connection = "AzureWebJobsStorage")] IAsyncCollector<TodoTableEntity> table,
             [Queue("todos", Connection = "AzureWebJobsStorage")] IAsyncCollector<Todo> queue,
             ILogger logger)
