@@ -1,0 +1,1 @@
+docker build -t azure-functions-sample:v1 .
